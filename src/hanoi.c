@@ -2,64 +2,148 @@
 #include <stdlib.h>
 #include "hanoi.h"
 
-/* Complete somente as funcoes abaixo. Nao use vetor para representar as torres. */
 
 int push(No **topo,int disco){
     No *novo = (No *)malloc(sizeof(No));
     if (novo == NULL) {
-    return 0; // Falha
+    return 0;
     }
     novo->disco = disco;
         novo->proximo = *topo;
         *topo = novo;
-        return 1; // Sucesso
+        return 1;
 }
-int pop(No **topo){
-    /* TODO 2: remover do inicio, usar free(), retornar disco ou -1. */
-    return -1;
+int pop(No **topo) {
+    if (torreVazia(*topo)) {
+        return -1;
+    }
+    No *temp = *topo;
+    int disco = temp->disco;
+    *topo = temp->proximo;
+    free(temp);
+    return disco;
 }
-int peek(No *topo){
-    /* TODO 3: consultar topo sem remover. */
-    return -1;
+
+int peek(No *topo) {
+    if (torreVazia(topo)) {
+        return -1;
+    }
+    return topo->disco;
 }
-int torreVazia(No *topo){
-    /* TODO 4 */
+
+int torreVazia(No *topo) {
+    return topo == NULL ? 1 : 0;
+}
+
+int registrarMovimento(Movimento **historico, char origem, char destino, int disco) {
+    Movimento *novo = (Movimento *)malloc(sizeof(Movimento));
+    if (novo == NULL) {
+        return 0; 
+    }
+    novo->disco = disco;
+    novo->origem = origem;
+    novo->destino = destino;
+    novo->proximo = NULL;
+
+    if (*historico == NULL) {
+        *historico = novo;
+    } else {
+        Movimento *atual = *historico;
+        while (atual->proximo != NULL) {
+            atual = atual->proximo;
+        }
+        atual->proximo = novo;
+    }
     return 1;
 }
-int registrarMovimento(Movimento **historico,char origem,char destino,int disco){
-    /* TODO 5: historico em lista encadeada, mantendo ordem cronologica. */
-    return 0;
+
+int contarMovimentos(Movimento *historico) {
+    int count = 0;
+    Movimento *atual = historico;
+    while (atual != NULL) {
+        count++;
+        atual = atual->proximo;
+    }
+    return count;
 }
-int contarMovimentos(Movimento *historico){
-    /* TODO 6 */
-    return 0;
+
+int moverDisco(Torre *origem, Torre *destino, Movimento **historico) {
+    if (torreVazia(origem->topo)) {
+        return 0;
+    }
+
+    int discoOrigem = peek(origem->topo);
+
+    if (!torreVazia(destino->topo)) {
+        int discoDestino = peek(destino->topo);
+        if (discoOrigem > discoDestino) {
+            return 0;
+        }
+    }
+
+    int disco = pop(&(origem->topo));
+    if (!push(&(destino->topo), disco)) {
+        push(&(origem->topo), disco);
+        return -1;
+    }
+
+    if (!registrarMovimento(historico, origem->nome, destino->nome, disco)) {
+        pop(&(destino->topo));
+        push(&(origem->topo), disco);
+        return -1;
+    }
+
+    return 1; 
 }
-int moverDisco(Torre *origem,Torre *destino,Movimento **historico){
-    /* TODO 7:
-       - origem nao vazia;
-       - maior nunca sobre menor;
-       - invalido nao altera estrutura;
-       - valido usa pop + push e registra historico;
-       retorno: 1 sucesso, 0 invalido, -1 erro memoria.
-    */
-    return 0;
+
+int verificarVitoria(Torre *destino, int quantidadeDiscos) {
+    No *atual = destino->topo;
+    for (int i = 1; i <= quantidadeDiscos; i++) {
+        if (atual == NULL || atual->disco != i) {
+            return 0;
+        }
+        atual = atual->proximo;
+    }
+    return atual == NULL ? 1 : 0;
 }
-int verificarVitoria(Torre *destino,int quantidadeDiscos){
-    /* TODO 8 */
-    return 0;
+
+void liberarTorre(No **topo) {
+    No *atual = *topo;
+    while (atual != NULL) {
+        No *prox = atual->proximo;
+        free(atual);
+        atual = prox;
+    }
+    *topo = NULL;
 }
-void liberarTorre(No **topo){
-    /* TODO 9 */
+
+void liberarHistorico(Movimento **historico) {
+    Movimento *atual = *historico;
+    while (atual != NULL) {
+        Movimento *prox = atual->proximo;
+        free(atual);
+        atual = prox;
+    }
+    *historico = NULL;
 }
-void liberarHistorico(Movimento **historico){
-    /* TODO 10 */
+
+int inicializarJogo(Torre *a, Torre *b, Torre *c, int quantidadeDiscos) {
+    liberarTorre(&(a->topo));
+    liberarTorre(&(b->topo));
+    liberarTorre(&(c->topo));
+
+    for (int i = quantidadeDiscos; i >= 1; i--) {
+        if (!push(&(a->topo), i)) {
+            return 0;
+        }
+    }
+    return 1;
 }
-int inicializarJogo(Torre *a,Torre *b,Torre *c,int quantidadeDiscos){
-    /* TODO 11: 3 a 8 discos; A com 1 no topo; B/C vazias. */
-    (void)a;(void)b;(void)c;(void)quantidadeDiscos;
-    return 0;
-}
-void reiniciarJogo(Torre *a,Torre *b,Torre *c,Movimento **historico,int quantidadeDiscos){
-    /* TODO 12 */
-    (void)a;(void)b;(void)c;(void)historico;(void)quantidadeDiscos;
+
+void reiniciarJogo(Torre *a, Torre *b, Torre *c, Movimento **historico, int quantidadeDiscos) {
+    liberarTorre(&(a->topo));
+    liberarTorre(&(b->topo));
+    liberarTorre(&(c->topo));
+    liberarHistorico(historico);
+    inicializarJogo(a, b, c, quantidadeDiscos);
 }
