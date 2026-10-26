@@ -5,7 +5,8 @@
 /* Complete somente as funcoes abaixo. Nao use vetor para representar as torres. */
 
 int push(No **topo,int disco){
-    /* TODO 1: inserir no inicio com malloc(). */
+    No *novo = (No *)malloc(sizeof(No));
+    if (novo == NULL) {
     return 0;
 }
 int pop(No **topo){
