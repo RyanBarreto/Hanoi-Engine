@@ -45,4 +45,3 @@ int main(void){
     liberarTorre(&A.topo);liberarTorre(&B.topo);liberarTorre(&C.topo);liberarHistorico(&historico);
     return 0;
 }
-
