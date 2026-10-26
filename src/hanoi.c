@@ -7,7 +7,7 @@
 int push(No **topo,int disco){
     No *novo = (No *)malloc(sizeof(No));
     if (novo == NULL) {
-    return 0;
+    return 0; // Falha
     }
     novo->disco = disco;
         novo->proximo = *topo;
