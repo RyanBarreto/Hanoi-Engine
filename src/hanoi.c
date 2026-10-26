@@ -8,6 +8,11 @@ int push(No **topo,int disco){
     No *novo = (No *)malloc(sizeof(No));
     if (novo == NULL) {
     return 0;
+    }
+    novo->disco = disco;
+        novo->proximo = *topo;
+        *topo = novo;
+        return 1; // Sucesso
 }
 int pop(No **topo){
     /* TODO 2: remover do inicio, usar free(), retornar disco ou -1. */
